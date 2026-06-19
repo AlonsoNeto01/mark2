@@ -74,8 +74,8 @@ graph TD
     UI -->|API Requests| M
 
     M --> Client
-    Client -->|GET /alunos/{id}| A
-    Client -->|GET /disciplinas/{id}| D
+    Client -->|"GET /alunos/{id}"| A
+    Client -->|"GET /disciplinas/{id}"| D
 ```
 
 ### Principais Decisões e Recursos de Design:

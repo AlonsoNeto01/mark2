@@ -1,0 +1,43 @@
+services:
+  alunos:
+    build:
+      context: ./alunos-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - alunos-db:/app/data
+    environment:
+      - PORT=8001
+
+  disciplinas:
+    build:
+      context: ./disciplinas-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    volumes:
+      - disciplinas-db:/app/data
+    environment:
+      - PORT=8002
+
+  matriculas:
+    build:
+      context: ./matriculas-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    volumes:
+      - matriculas-db:/app/data
+    environment:
+      - PORT=8003
+      - ALUNOS_SERVICE_URL=http://alunos:8001
+      - DISCIPLINAS_SERVICE_URL=http://disciplinas:8002
+    depends_on:
+      - alunos
+      - disciplinas
+
+volumes:
+  alunos-db:
+  disciplinas-db:
+  matriculas-db:

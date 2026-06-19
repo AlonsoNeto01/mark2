@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Acadêmico Distribuído</title>
+    <meta name="description" content="Painel de controle do Sistema Acadêmico Distribuído - UFOPA">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0d14;
+            --bg-secondary: #111420;
+            --bg-card: rgba(17, 20, 32, 0.85);
+            --bg-card-hover: rgba(22, 26, 42, 0.9);
+            --bg-elevated: rgba(25, 28, 45, 0.6);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --accent: #818cf8;
+            --accent-bright: #a5b4fc;
+            --accent-dim: #4f46e5;
+            --accent-glow: rgba(129, 140, 248, 0.3);
+            --success: #34d399;
+            --success-dim: rgba(52, 211, 153, 0.15);
+            --danger: #f87171;
+            --danger-dim: rgba(248, 113, 113, 0.15);
+            --warning: #fbbf24;
+            --warning-dim: rgba(251, 191, 36, 0.15);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 10% 10%, rgba(79, 70, 229, 0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 350px at 90% 80%, rgba(52, 211, 153, 0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 400px 400px at 50% 50%, rgba(129, 140, 248, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating grid pattern */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1520px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 3rem;
+        }
+
+        /* =============== HEADER =============== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0 2rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            box-shadow: 0 4px 24px var(--accent-glow);
+        }
+
+        h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #e0e7ff 0%, var(--accent) 60%, var(--accent-dim) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+            letter-spacing: 0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-refresh:hover {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+            background: rgba(79, 70, 229, 0.08);
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-refresh svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* =============== STATUS GRID =============== */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .status-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-card:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .status-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .service-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .service-name {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .service-port {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.68rem;
+            padding: 5px 10px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-indicator.online {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .status-indicator.offline {
+            background: var(--danger-dim);
+            color: var(--danger);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-indicator.online .status-dot {
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-indicator.offline .status-dot {
+            background-color: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 4px var(--success); }
+            50% { box-shadow: 0 0 12px var(--success), 0 0 20px rgba(52, 211, 153, 0.3); }
+        }
+
+        /* Chaos Toggle */
+        .chaos-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .chaos-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chaos-label svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0.6;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 34px;
+            transition: all 0.3s ease;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: white;
+        }
+
+        /* =============== MAIN LAYOUT =============== */
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Main Panel */
+        .main-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* =============== TABS =============== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 1.75rem;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: var(--radius-md);
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.65rem 1rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-dim);
+            color: white;
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeUp 0.35s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =============== FORMS =============== */
+        .form-box {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        input, select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 0.9rem;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12), 0 0 20px rgba(129, 140, 248, 0.08);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 2.2rem;
+        }
+
+        select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+            color: white;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit:hover {
+            box-shadow: 0 4px 24px var(--accent-glow);
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* =============== TABLE =============== */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.025);
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(129, 140, 248, 0.03);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-active {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .badge-inactive {
+            background: var(--danger-dim);
+            color: var(--danger);
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            cursor: pointer;
+            color: var(--danger);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            background: var(--danger-dim);
+            border-color: rgba(248, 113, 113, 0.4);
+        }
+
+        .action-btn.reactivate {
+            border-color: rgba(52, 211, 153, 0.25);
+            color: var(--success);
+        }
+
+        .action-btn.reactivate:hover {
+            background: var(--success-dim);
+            border-color: rgba(52, 211, 153, 0.5);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* =============== DIAGRAM =============== */
+        .diagram-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .diagram-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .diagram-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
+
+        .diagram-container {
+            position: relative;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            overflow: hidden;
+        }
+
+        /* SVG layer for connections */
+        .diagram-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .diagram-svg line {
+            stroke: rgba(255, 255, 255, 0.06);
+            stroke-width: 2;
+            stroke-dasharray: 6 4;
+        }
+
+        .diagram-svg line.line-active {
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-dasharray: 6 4;
+            filter: drop-shadow(0 0 4px var(--accent-glow));
+            animation: dash-flow 1s linear infinite;
+        }
+
+        .diagram-svg line.line-success {
+            stroke: var(--success);
+            filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.4));
+        }
+
+        .diagram-svg line.line-danger {
+            stroke: var(--danger);
+            filter: drop-shadow(0 0 4px rgba(248, 113, 113, 0.4));
+        }
+
+        @keyframes dash-flow {
+            to { stroke-dashoffset: -20; }
+        }
+
+        .diagram-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .node-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .node-circle.active {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+            background: rgba(79, 70, 229, 0.12);
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+
+        .node-circle.success-node {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(52, 211, 153, 0.08);
+            box-shadow: 0 0 24px rgba(52, 211, 153, 0.25);
+        }
+
+        .node-circle.danger-node {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(248, 113, 113, 0.08);
+            box-shadow: 0 0 24px rgba(248, 113, 113, 0.25);
+        }
+
+        .node-name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Arrow label */
+        .flow-label {
+            position: absolute;
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .flow-label.visible {
+            opacity: 1;
+        }
+
+        /* =============== LOGS =============== */
+        .logs-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 320px;
+            max-height: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logs-header {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .logs-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logs-header-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
+
+        .btn-clear-logs {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-clear-logs:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-dim);
+        }
+
+        .logs-body {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.72rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            line-height: 1.5;
+        }
+
+        .logs-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .logs-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .logs-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+
+        .log-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            background: rgba(255, 255, 255, 0.015);
+            animation: slideIn 0.25s ease;
+            word-break: break-word;
+        }
+
+        .log-item.success {
+            border-left-color: var(--success);
+            color: #a7f3d0;
+        }
+
+        .log-item.error {
+            border-left-color: var(--danger);
+            color: #fca5a5;
+        }
+
+        .log-item.warning {
+            border-left-color: var(--warning);
+            color: #fde68a;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            margin-right: 8px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* =============== TOAST NOTIFICATIONS =============== */
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.2rem;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--danger);
+        }
+
+        .toast.warning {
+            border-left: 3px solid var(--warning);
+        }
+
+        .toast-remove {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
+        /* =============== EMPTY STATE =============== */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.75rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* =============== RESPONSIVE =============== */
+        @media (max-width: 768px) {
+            .app-wrapper {
+                padding: 1rem;
+            }
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            .main-panel {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="app-wrapper">
+        <header>
+            <div class="header-brand">
+                <div class="brand-icon">SD</div>
+                <div>
+                    <h1>Sistema Acadêmico Distribuído</h1>
+                    <div class="subtitle">UFOPA — Disciplina de Sistemas Distribuídos</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-refresh" onclick="atualizarTudo()" id="btn-reload">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Atualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- Status Grid -->
+        <div class="status-grid">
+            <div class="status-card" id="status-alunos">
+                <div class="card-top">
+                    <div class="service-info">
+                        <span class="service-name">Alunos Service</span>
+                        <span class="service-port">:8001 · alunos.db</span>
+                    </div>
+                    <div class="status-indicator offline" id="indicator-alunos">
+                        <span class="status-dot"></span>
+                        <span class="status-text">OFFLINE</span>
+                    </div>
+                </div>
+                <div class="chaos-control">
+                    <span class="chaos-label">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Simular Queda
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" id="chaos-alunos" onchange="toggleCaosServico('alunos')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="status-card" id="status-disciplinas">
+                <div class="card-top">
+                    <div class="service-info">
+                        <span class="service-name">Disciplinas Service</span>
+                        <span class="service-port">:8002 · disciplinas.db</span>
+                    </div>
+                    <div class="status-indicator offline" id="indicator-disciplinas">
+                        <span class="status-dot"></span>
+                        <span class="status-text">OFFLINE</span>
+                    </div>
+                </div>
+                <div class="chaos-control">
+                    <span class="chaos-label">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Simular Queda
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" id="chaos-disciplinas" onchange="toggleCaosServico('disciplinas')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="status-card" id="status-matriculas">
+                <div class="card-top">
+                    <div class="service-info">
+                        <span class="service-name">Matrículas Service</span>
+                        <span class="service-port">:8003 · matriculas.db</span>
+                    </div>
+                    <div class="status-indicator offline" id="indicator-matriculas">
+                        <span class="status-dot"></span>
+                        <span class="status-text">OFFLINE</span>
+                    </div>
+                </div>
+                <div class="chaos-control" style="opacity: 0.3; pointer-events: none;">
+                    <span class="chaos-label">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Orquestrador
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" disabled>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="dashboard-content">
+            <!-- Left: Forms & Data -->
+            <div class="main-panel">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('alunos')" id="tab-btn-alunos">Alunos</button>
+                    <button class="tab-btn" onclick="switchTab('disciplinas')" id="tab-btn-disciplinas">Disciplinas</button>
+                    <button class="tab-btn" onclick="switchTab('matriculas')" id="tab-btn-matriculas">Matrículas</button>
+                </div>
+
+                <!-- Tab: Alunos -->
+                <div id="tab-alunos" class="tab-content active">
+                    <div class="form-box">
+                        <div class="form-title">Cadastrar Novo Aluno</div>
+                        <form id="form-aluno" onsubmit="cadastrarAluno(event)">
+                            <div class="grid-inputs">
+                                <div class="input-group">
+                                    <label for="aluno-nome">Nome do Aluno *</label>
+                                    <input type="text" id="aluno-nome" placeholder="Ex: Maria Silva" required minlength="3" maxlength="100">
+                                </div>
+                                <div class="input-group">
+                                    <label for="aluno-email">E-mail *</label>
+                                    <input type="email" id="aluno-email" placeholder="Ex: maria@ufopa.edu.br" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="aluno-curso">Curso</label>
+                                    <input type="text" id="aluno-curso" placeholder="Ex: Sistemas de Informação">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit">Criar Registro de Aluno</button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Curso</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-alunos-body">
+                                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Carregando alunos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab: Disciplinas -->
+                <div id="tab-disciplinas" class="tab-content">
+                    <div class="form-box">
+                        <div class="form-title">Cadastrar Nova Disciplina</div>
+                        <form id="form-disciplina" onsubmit="cadastrarDisciplina(event)">
+                            <div class="grid-inputs">
+                                <div class="input-group">
+                                    <label for="disc-nome">Nome da Disciplina *</label>
+                                    <input type="text" id="disc-nome" placeholder="Ex: Sistemas Distribuídos" required minlength="3" maxlength="100">
+                                </div>
+                                <div class="input-group">
+                                    <label for="disc-codigo">Código Único *</label>
+                                    <input type="text" id="disc-codigo" placeholder="Ex: SD001" required maxlength="10">
+                                </div>
+                                <div class="input-group">
+                                    <label for="disc-carga">Carga Horária (h) *</label>
+                                    <input type="number" id="disc-carga" placeholder="Ex: 60" required min="1">
+                                </div>
+                                <div class="input-group">
+                                    <label for="disc-vagas">Vagas Disponíveis *</label>
+                                    <input type="number" id="disc-vagas" placeholder="Ex: 30" required min="0">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit">Criar Registro de Disciplina</button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>Carga Horária</th>
+                                    <th>Vagas</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-disciplinas-body">
+                                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Carregando disciplinas...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab: Matrículas -->
+                <div id="tab-matriculas" class="tab-content">
+                    <div class="form-box">
+                        <div class="form-title">Efetuar Nova Matrícula (Orquestração HTTP)</div>
+                        <form id="form-matricula" onsubmit="cadastrarMatricula(event)">
+                            <div class="grid-inputs">
+                                <div class="input-group">
+                                    <label for="select-alunos">Selecione o Aluno *</label>
+                                    <select id="select-alunos" required>
+                                        <option value="">Selecione um Aluno</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="select-disciplinas">Selecione a Disciplina *</label>
+                                    <select id="select-disciplinas" required>
+                                        <option value="">Selecione uma Disciplina</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit">Realizar Matrícula</button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID Matrícula</th>
+                                    <th>Aluno e Disciplina (HTTP)</th>
+                                    <th>Data Matrícula</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-matriculas-body">
+                                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Carregando matrículas...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Diagram + Logs -->
+            <div class="right-column">
+                <!-- Flow Diagram -->
+                <div class="diagram-card">
+                    <div class="diagram-title">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Fluxo HTTP entre Serviços
+                    </div>
+                    <div class="diagram-container" id="diagram-container">
+                        <!-- SVG connections -->
+                        <svg class="diagram-svg" id="diagram-svg">
+                            <line id="svg-line-alunos" x1="30%" y1="50%" x2="70%" y2="28%" />
+                            <line id="svg-line-disciplinas" x1="30%" y1="50%" x2="70%" y2="72%" />
+                        </svg>
+
+                        <!-- Flow labels -->
+                        <div class="flow-label" id="label-alunos" style="left: 38%; top: 26%;">GET /alunos</div>
+                        <div class="flow-label" id="label-disciplinas" style="left: 38%; top: 68%;">GET /disciplinas</div>
+
+                        <!-- Nodes -->
+                        <div class="diagram-node" style="left: 8%; top: 50%; transform: translateY(-50%);">
+                            <div class="node-circle active" id="node-matriculas">MATR</div>
+                            <span class="node-name">Matrículas</span>
+                        </div>
+                        <div class="diagram-node" style="right: 8%; top: 22%; transform: translateY(-50%);">
+                            <div class="node-circle" id="node-alunos">ALUN</div>
+                            <span class="node-name">Alunos</span>
+                        </div>
+                        <div class="diagram-node" style="right: 8%; top: 78%; transform: translateY(-50%);">
+                            <div class="node-circle" id="node-disciplinas">DISC</div>
+                            <span class="node-name">Disciplinas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Console -->
+                <div class="logs-box">
+                    <div class="logs-header">
+                        <div class="logs-header-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Console de Eventos
+                        </div>
+                        <button class="btn-clear-logs" onclick="clearLogs()">Limpar</button>
+                    </div>
+                    <div class="logs-body" id="logs-list">
+                        <div class="log-item warning"><span class="log-time">[--:--:--]</span>Painel carregado. Aguardando serviços...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urls = {
+            alunos: 'http://localhost:8001',
+            disciplinas: 'http://localhost:8002',
+            matriculas: 'http://localhost:8003'
+        };
+
+        // ======================== TAB MANAGEMENT ========================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.getElementById(`tab-btn-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            if (tab === 'matriculas') {
+                carregarDropdowns();
+            }
+        }
+
+        // ======================== TOAST NOTIFICATIONS ========================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠';
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span style="font-size:1.1rem">${icon}</span> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('toast-remove');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ======================== LOGS ========================
+        function addLog(message, type = 'info') {
+            const logsList = document.getElementById('logs-list');
+            const now = new Date();
+            const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.innerHTML = `<span class="log-time">${timeStr}</span>${message}`;
+
+            logsList.appendChild(logItem);
+            logsList.scrollTop = logsList.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs-list').innerHTML = '';
+            addLog('Console limpo.', 'info');
+        }
+
+        // ======================== DIAGRAM ANIMATIONS ========================
+        function animarChamadaHttp(destino, sucesso = true) {
+            const nodeMatr = document.getElementById('node-matriculas');
+            const nodeDestino = document.getElementById(`node-${destino}`);
+            const svgLine = document.getElementById(`svg-line-${destino}`);
+            const label = document.getElementById(`label-${destino}`);
+
+            nodeMatr.classList.add('active');
+            svgLine.classList.add('line-active');
+            label.classList.add('visible');
+            label.textContent = sucesso ? `GET /${destino}` : `TIMEOUT`;
+
+            setTimeout(() => {
+                svgLine.classList.remove('line-active');
+                svgLine.classList.add(sucesso ? 'line-success' : 'line-danger');
+                nodeDestino.className = `node-circle ${sucesso ? 'success-node' : 'danger-node'}`;
+
+                setTimeout(() => {
+                    svgLine.classList.remove('line-success', 'line-danger');
+                    nodeDestino.className = 'node-circle';
+                    label.classList.remove('visible');
+                }, 2000);
+            }, 1200);
+        }
+
+        // ======================== CHAOS TOGGLE ========================
+        async function toggleCaosServico(servico) {
+            const checkbox = document.getElementById(`chaos-${servico}`);
+            const ativo = checkbox.checked;
+
+            addLog(`Caos → ${servico}: ${ativo ? 'ativando queda simulada' : 'restaurando serviço'}`, 'warning');
+
+            try {
+                const res = await fetch(`${urls[servico]}/toggle-chaos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ativo: ativo })
+                });
+
+                if (res.ok) {
+                    addLog(`Caos em ${servico} ${ativo ? 'ATIVADO' : 'DESATIVADO'}`, 'success');
+                    showToast(`Caos em ${servico} ${ativo ? 'ativado' : 'desativado'}`, ativo ? 'warning' : 'success');
+                    checkHealth();
+                } else {
+                    addLog(`Falha ao alterar caos em ${servico}`, 'error');
+                }
+            } catch (e) {
+                addLog(`Erro de comunicação com ${servico}`, 'error');
+                showToast(`Falha na comunicação com ${servico}`, 'error');
+            }
+        }
+
+        // ======================== HEALTH CHECKS ========================
+        async function checkHealth() {
+            for (const [key, value] of Object.entries(urls)) {
+                const indicator = document.getElementById(`indicator-${key}`);
+                const startTime = Date.now();
+                try {
+                    const res = await fetch(`${value}/health`, { method: 'GET' });
+                    const latency = Date.now() - startTime;
+                    if (res.ok) {
+                        indicator.className = 'status-indicator online';
+                        indicator.querySelector('.status-text').innerText = `ONLINE · ${latency}ms`;
+                    } else {
+                        throw new Error();
+                    }
+                } catch (e) {
+                    indicator.className = 'status-indicator offline';
+                    indicator.querySelector('.status-text').innerText = 'OFFLINE';
+                }
+            }
+        }
+
+        // ======================== DATA LOADING ========================
+        async function carregarAlunos() {
+            try {
+                const res = await fetch(`${urls.alunos}/alunos`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const body = document.getElementById('table-alunos-body');
+                    body.innerHTML = '';
+                    if (data.length === 0) {
+                        body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum aluno cadastrado.</td></tr>`;
+                    }
+                    data.forEach(aluno => {
+                        const tr = document.createElement('tr');
+                        const actionHtml = aluno.ativo
+                            ? `<button class="action-btn" onclick="excluirAluno(${aluno.id})">Desativar</button>`
+                            : `<button class="action-btn reactivate" onclick="reativarAluno(${aluno.id})">Reativar</button>`;
+                        tr.innerHTML = `
+                            <td>${aluno.id}</td>
+                            <td><strong>${aluno.nome}</strong></td>
+                            <td style="color:var(--text-secondary)">${aluno.email}</td>
+                            <td>${aluno.curso || '—'}</td>
+                            <td><span class="badge ${aluno.ativo ? 'badge-active' : 'badge-inactive'}">${aluno.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                            <td>${actionHtml}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+            } catch (e) {
+                addLog('Falha ao obter Alunos (offline)', 'error');
+            }
+        }
+
+        async function carregarDisciplinas() {
+            try {
+                const res = await fetch(`${urls.disciplinas}/disciplinas`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const body = document.getElementById('table-disciplinas-body');
+                    body.innerHTML = '';
+                    if (data.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhuma disciplina cadastrada.</td></tr>`;
+                    }
+                    data.forEach(disc => {
+                        const tr = document.createElement('tr');
+                        const actionHtml = disc.ativo
+                            ? `<button class="action-btn" onclick="excluirDisciplina(${disc.id})">Desativar</button>`
+                            : `<button class="action-btn reactivate" onclick="reativarDisciplina(${disc.id})">Reativar</button>`;
+                        tr.innerHTML = `
+                            <td>${disc.id}</td>
+                            <td><strong style="color:var(--accent-bright);font-family:monospace;font-size:0.82rem;">${disc.codigo}</strong></td>
+                            <td>${disc.nome}</td>
+                            <td>${disc.carga_horaria}h</td>
+                            <td>${disc.vagas}</td>
+                            <td><span class="badge ${disc.ativo ? 'badge-active' : 'badge-inactive'}">${disc.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                            <td>${actionHtml}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+            } catch (e) {
+                addLog('Falha ao obter Disciplinas (offline)', 'error');
+            }
+        }
+
+        async function carregarMatriculas() {
+            try {
+                const res = await fetch(`${urls.matriculas}/matriculas`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const body = document.getElementById('table-matriculas-body');
+                    body.innerHTML = '';
+                    if (data.length === 0) {
+                        body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhuma matrícula registrada.</td></tr>`;
+                    }
+
+                    for (const mat of data) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${mat.id}</td>
+                            <td id="mat-agregado-${mat.id}" style="color:var(--text-muted)">Carregando via HTTP...</td>
+                            <td>${new Date(mat.data_matricula).toLocaleString('pt-BR')}</td>
+                            <td><span class="badge ${mat.status === 'ativa' ? 'badge-active' : 'badge-inactive'}">${mat.status}</span></td>
+                            <td>${mat.status === 'ativa' ? `<button class="action-btn" onclick="cancelarMatricula(${mat.id})">Cancelar</button>` : '—'}</td>
+                        `;
+                        body.appendChild(tr);
+
+                        fetch(`${urls.matriculas}/matriculas/${mat.id}/completa`)
+                            .then(async r => {
+                                const td = document.getElementById(`mat-agregado-${mat.id}`);
+                                if (r.ok) {
+                                    const completa = await r.json();
+                                    td.innerHTML = `
+                                        <strong>${completa.aluno.nome}</strong> <span style="color:var(--text-muted);font-size:0.78rem;">(ID ${completa.aluno_id})</span><br>
+                                        <span style="font-size:0.78rem;color:var(--accent-bright)">${completa.disciplina.nome} (${completa.disciplina.codigo})</span>
+                                    `;
+                                } else {
+                                    td.innerHTML = `<span style="color:var(--danger)">Erro de agregação</span>`;
+                                }
+                            })
+                            .catch(() => {
+                                const td = document.getElementById(`mat-agregado-${mat.id}`);
+                                td.innerHTML = `<span style="color:var(--danger)">Serviço offline</span>`;
+                            });
+                    }
+                }
+            } catch (e) {
+                addLog('Falha ao obter Matrículas (offline)', 'error');
+            }
+        }
+
+        async function carregarDropdowns() {
+            try {
+                const resA = await fetch(`${urls.alunos}/alunos`);
+                const selectA = document.getElementById('select-alunos');
+                selectA.innerHTML = '<option value="">Selecione um Aluno</option>';
+                if (resA.ok) {
+                    const alunos = await resA.json();
+                    alunos.forEach(aluno => {
+                        if (aluno.ativo) {
+                            selectA.innerHTML += `<option value="${aluno.id}">${aluno.nome} (${aluno.email})</option>`;
+                        }
+                    });
+                }
+
+                const resD = await fetch(`${urls.disciplinas}/disciplinas`);
+                const selectD = document.getElementById('select-disciplinas');
+                selectD.innerHTML = '<option value="">Selecione uma Disciplina</option>';
+                if (resD.ok) {
+                    const discs = await resD.json();
+                    discs.forEach(d => {
+                        if (d.ativo) {
+                            selectD.innerHTML += `<option value="${d.id}">${d.nome} (${d.codigo}) — ${d.vagas} vagas</option>`;
+                        }
+                    });
+                }
+            } catch (e) {
+                addLog('Erro ao carregar dropdowns (serviço offline)', 'warning');
+            }
+        }
+
+        // ======================== POST ACTIONS ========================
+        async function cadastrarAluno(e) {
+            e.preventDefault();
+            const nome = document.getElementById('aluno-nome').value;
+            const email = document.getElementById('aluno-email').value;
+            const curso = document.getElementById('aluno-curso').value;
+
+            addLog(`POST /alunos → ${nome}`, 'info');
+            try {
+                const res = await fetch(`${urls.alunos}/alunos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, curso })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    addLog(`Aluno "${data.nome}" criado (ID ${data.id})`, 'success');
+                    showToast(`Aluno "${data.nome}" cadastrado com sucesso!`, 'success');
+                    document.getElementById('form-aluno').reset();
+                    carregarAlunos();
+                } else {
+                    addLog(`Erro: ${data.detail || 'Desconhecido'}`, 'error');
+                    showToast(`Erro ao cadastrar: ${data.detail || 'Desconhecido'}`, 'error');
+                }
+            } catch (err) {
+                addLog('Erro de rede ao cadastrar aluno', 'error');
+                showToast('Erro de rede ao cadastrar aluno', 'error');
+            }
+        }
+
+        async function cadastrarDisciplina(e) {
+            e.preventDefault();
+            const nome = document.getElementById('disc-nome').value;
+            const codigo = document.getElementById('disc-codigo').value;
+            const carga_horaria = parseInt(document.getElementById('disc-carga').value);
+            const vagas = parseInt(document.getElementById('disc-vagas').value);
+
+            addLog(`POST /disciplinas → ${codigo}`, 'info');
+            try {
+                const res = await fetch(`${urls.disciplinas}/disciplinas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, codigo, carga_horaria, vagas })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    addLog(`Disciplina "${data.nome}" criada!`, 'success');
+                    showToast(`Disciplina "${data.nome}" cadastrada!`, 'success');
+                    document.getElementById('form-disciplina').reset();
+                    carregarDisciplinas();
+                } else {
+                    addLog(`Erro: ${data.detail || 'Desconhecido'}`, 'error');
+                    showToast(`Erro: ${data.detail || 'Desconhecido'}`, 'error');
+                }
+            } catch (err) {
+                addLog('Erro de rede ao cadastrar disciplina', 'error');
+                showToast('Erro de rede ao cadastrar disciplina', 'error');
+            }
+        }
+
+        async function cadastrarMatricula(e) {
+            e.preventDefault();
+            const aluno_id = parseInt(document.getElementById('select-alunos').value);
+            const disciplina_id = parseInt(document.getElementById('select-disciplinas').value);
+
+            addLog(`POST /matriculas → Aluno ${aluno_id} ↔ Disciplina ${disciplina_id}`, 'info');
+
+            // Animate diagram
+            animarChamadaHttp('alunos', !document.getElementById('chaos-alunos').checked);
+            setTimeout(() => {
+                animarChamadaHttp('disciplinas', !document.getElementById('chaos-disciplinas').checked);
+            }, 700);
+
+            try {
+                const res = await fetch(`${urls.matriculas}/matriculas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aluno_id, disciplina_id })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    addLog(`Matrícula efetuada (ID ${data.id})!`, 'success');
+                    showToast('Matrícula efetuada com sucesso!', 'success');
+                    carregarMatriculas();
+                } else {
+                    addLog(`Rejeitada: ${data.detail || 'Erro'}`, 'error');
+                    showToast(`Matrícula rejeitada: ${data.detail || 'Erro'}`, 'error');
+                }
+            } catch (err) {
+                addLog('Erro crítico: Matrículas offline', 'error');
+                showToast('Serviço de Matrículas offline', 'error');
+            }
+        }
+
+        async function excluirAluno(id) {
+            addLog(`DELETE /alunos/${id}`, 'info');
+            try {
+                const res = await fetch(`${urls.alunos}/alunos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    addLog(`Aluno ${id} desativado (soft delete)`, 'success');
+                    showToast(`Aluno ${id} desativado`, 'warning');
+                    carregarAlunos();
+                }
+            } catch (e) {
+                addLog('Erro ao desativar aluno', 'error');
+            }
+        }
+
+        async function reativarAluno(id) {
+            addLog(`PATCH /alunos/${id}/reativar`, 'info');
+            try {
+                const res = await fetch(`${urls.alunos}/alunos/${id}/reativar`, { method: 'PATCH' });
+                if (res.ok) {
+                    addLog(`Aluno ${id} reativado com sucesso!`, 'success');
+                    showToast(`Aluno ${id} reativado!`, 'success');
+                    carregarAlunos();
+                } else {
+                    const data = await res.json();
+                    addLog(`Erro ao reativar: ${data.detail || 'Desconhecido'}`, 'error');
+                    showToast(`Erro: ${data.detail || 'Desconhecido'}`, 'error');
+                }
+            } catch (e) {
+                addLog('Erro de rede ao reativar aluno', 'error');
+                showToast('Erro de rede ao reativar aluno', 'error');
+            }
+        }
+
+        async function excluirDisciplina(id) {
+            addLog(`DELETE /disciplinas/${id}`, 'info');
+            try {
+                const res = await fetch(`${urls.disciplinas}/disciplinas/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    addLog(`Disciplina ${id} desativada`, 'success');
+                    showToast(`Disciplina ${id} desativada`, 'warning');
+                    carregarDisciplinas();
+                }
+            } catch (e) {
+                addLog('Erro ao desativar disciplina', 'error');
+            }
+        }
+
+        async function reativarDisciplina(id) {
+            addLog(`PATCH /disciplinas/${id}/reativar`, 'info');
+            try {
+                const res = await fetch(`${urls.disciplinas}/disciplinas/${id}/reativar`, { method: 'PATCH' });
+                if (res.ok) {
+                    addLog(`Disciplina ${id} reativada com sucesso!`, 'success');
+                    showToast(`Disciplina ${id} reativada!`, 'success');
+                    carregarDisciplinas();
+                } else {
+                    const data = await res.json();
+                    addLog(`Erro ao reativar: ${data.detail || 'Desconhecido'}`, 'error');
+                    showToast(`Erro: ${data.detail || 'Desconhecido'}`, 'error');
+                }
+            } catch (e) {
+                addLog('Erro de rede ao reativar disciplina', 'error');
+                showToast('Erro de rede ao reativar disciplina', 'error');
+            }
+        }
+
+        async function cancelarMatricula(id) {
+            addLog(`PUT /matriculas/${id} → cancelar`, 'info');
+            try {
+                const res = await fetch(`${urls.matriculas}/matriculas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelada' })
+                });
+                if (res.ok) {
+                    addLog(`Matrícula ${id} cancelada`, 'warning');
+                    showToast(`Matrícula ${id} cancelada`, 'warning');
+                    carregarMatriculas();
+                }
+            } catch (e) {
+                addLog('Erro ao cancelar matrícula', 'error');
+            }
+        }
+
+        async function atualizarTudo() {
+            const btn = document.getElementById('btn-reload');
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+            
+            addLog('Atualizando todos os microsserviços...', 'info');
+            await checkHealth();
+            await carregarAlunos();
+            await carregarDisciplinas();
+            await carregarMatriculas();
+            
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+
+        // Health check interval
+        setInterval(checkHealth, 3000);
+
+        window.onload = () => {
+            atualizarTudo();
+        };
+    </script>
+</body>
+</html>
